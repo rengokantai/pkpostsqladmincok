@@ -19,3 +19,8 @@ listen_addresses = '*'
 			host:port:dbname:user:password
 such as		myhost:5432:postgres:user:pass
 ```
+
+- cp2
+```
+SELECT date_trunc('second',current_timestamp - pg_postmaster_start_time()) as uptime;
+```
