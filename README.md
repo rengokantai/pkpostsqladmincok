@@ -69,7 +69,7 @@ boot_val,reset_val
 
 reload config file: re-read the postgresql.conf
 ```
-pg_ctl -D data reload
+pg_ctl -D /usr/local/pgsql/data reload         //data dic
 ```
 
 alter role, with and set
@@ -99,4 +99,61 @@ In each round, no more than this many buffers will be written by the background 
 bgwriter_lru_maxpages = 0
 ```
 
+- cp4
+start pg server. from [here](http://www.postgresql.org/docs/current/static/server-start.html)  
+```
+postgres -D /usr/local/pgsql/data
+```
 
+stop:
+```
+pg_ctl -D /usr/local/pgsql/data -m fast stop   // -m fast means immediately
+pg_ctl -D /usr/local/pgsql/data -m immediate stop   //even fast
+```
+Reloading the server configuration files,(see prev chap)
+```
+select pg_reload_conf(); //show result
+```
+
+
+some important settings: possible context value: sighup , superuser
+```
+SELECT name, setting, unit,(source = 'default') as is_default FROM pg_settings WHERE context = 'sighup' AND (name like '%delay' or name like '%timeout') AND setting != '0';
+```
+
+kill
+```
+kill -SIGHUP \`psql -t -c "select pid from pg_stat_activity limit 1"`
+```
+
+limit database connection:
+```
+ALTER DATABASE db CONNECTION LIMIT 0;
+ALTER USER user CONNECTION LIMIT 0;
+```
+
+(test), create a pg_hba.conf, add these: (only superusers are allowed to connect)
+```
+local  all	       postgres			ident
+  local  all		all	      			reject
+  host   all		all	      0.0.0.0/0	reject
+```
+
+list connections per user
+```
+SELECT rolconnlimit FROM pg_roles WHERE rolname = 'ke';
+```
+check online users
+```
+SELECT count(*) FROM pg_stat_activity WHERE usename = 'ke';
+```
+
+
+kick user out.  
+//list all non-superusers
+```
+SELECT count(pg_terminate_backend(pid)) FROM pg_stat_activity WHERE usename NOT IN (SELECT usename FROM pg_user WHERE usesuper);
+```
+  
+  
+  
