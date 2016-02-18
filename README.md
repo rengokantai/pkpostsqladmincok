@@ -156,4 +156,51 @@ SELECT count(pg_terminate_backend(pid)) FROM pg_stat_activity WHERE usename NOT 
 ```
   
   
-  
+- cp5
+```
+SELECT * FROM AA; = SELECT * FROM aa; = SELECT * FROM aA;
+```
+but not SELECT * FROM "AA";
+to remove this, use 
+```
+select quote_ident('AA');
+```
+
+show al rows with same id
+```
+SELECT * FROM data WHERE id IN (SELECT id FROM data GROUP BY id HAVING count(*) > 1);
+```
+
+
+delete exactly duplicate row
+```
+BEGIN;
+LOCK TABLE table IN ROW EXCLUSIVE MODE;
+DELETE FROM table WHERE ctid NOT IN (SELECT min(ctid) FROM table WHERE id IN (1) GROUP BY customerid);
+COMMIT;
+```
+Then cleanup
+```
+VACUUM table;
+```
+
+prevent dulpicate row
+```
+ALTER TABLE table ADD PRIMARY KEY(id);
+ALTER TABLE table ADD UNIQUE(id);
+CREATE UNIQUE INDEX ON table(id);
+```
+
+
+create partial index:
+```
+CREATE UNIQUE INDEX ON table(customerid) WHERE column = 'prop';
+```
+
+
+analyze duplicates(finding duplicate key)
+```
+analyze table;
+SELECT attname, n_distinct FROM pg_stats WHERE schemaname = 'public' AND tablename = 'name';
+```
+-1 means no duplicate.
