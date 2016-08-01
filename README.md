@@ -89,7 +89,38 @@ or debug mode(vertical output, =\G)
 \x
 select * from pg_database;
 ```
-
+```
+select * from pg_tables;
+```
+######How many tables
+```
+SELECT count(*) FROM information_schema.tables WHERE table_schema NOT IN ('information_schema', 'pg_catalog');
+```
+use psql
+```
+psql -c "\d" postgres
+```
+######disk space does a database use
+```
+SELECT pg_database_size(current_database());
+SELECT sum(pg_database_size(datname)) from pg_database;
+```
+######disk space does a table use
+```
+select pg_relation_size('test');
+```
+total size including index
+```
+select pg_total_relation_size('test');
+```
+metacommand
+```
+\dt+ test
+```
+use pretty
+```
+SELECT pg_size_pretty(pg_relation_size('test'));
+```
 - cp3
 work_mem  
 ```
