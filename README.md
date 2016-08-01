@@ -30,20 +30,65 @@ interactive
 ```
 psql –f file.sql
 ```
-
-==
-.pgpass file.
+######Changing your password securely
+use meta command
 ```
-			host:port:dbname:user:password
+\password
+```
+
+######Avoiding hardcoding
+.pgpass file. in ~/
+```
+host:port:dbname:user:password
 such as		myhost:5432:postgres:user:pass
 ```
+######Using a connection service file (may need to use with .pgpass)
+.pg_service.conf in ~/, or pg_service.conf in /etc/
+```
+[ke]
+host=localhost
+port=5432
+dbname=postgres
+```
 
-- cp2
+#####Chapter 2. Exploring the Db
+######What version
+```
+SELECT version();
+psql --version
+```
+######uptime
 ```
 SELECT date_trunc('second',current_timestamp - pg_postmaster_start_time()) as uptime;
 ```
-
-
+######database server's message log
+in debian:
+```
+cd /var/log/postgresql
+```
+redhat
+```
+cd /var/lib/pgsql/data/pg_log
+```
+######database's system identifier
+```
+cd /usr/lib/postgresql/9.5/bin
+```
+use
+```
+./pg_controldata /var/lib/postgresql/9.5/main/ | grep "system identifier"
+```
+######Listing databases
+```
+psql -l
+\l
+select datname from pg_database;
+```
+or debug mode(vertical output, =\G)
+```
+\x
+select * from pg_database;
+```
 
 - cp3
 work_mem  
