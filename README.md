@@ -121,8 +121,27 @@ use pretty
 ```
 SELECT pg_size_pretty(pg_relation_size('test'));
 ```
-- cp3
-work_mem  
+######biggest tables
+```
+SELECT table_name,pg_relation_size(table_schema || '.' || table_name) as size FROM information_schema.tables WHERE table_schema NOT IN ('information_schema', 'pg_catalog') ORDER BY size DESC;
+```
+estimate number of rows in a (big) table
+```
+SELECT (CASE WHEN reltuples > 0 THEN pg_relation_size('ke')*reltuples/(8192*relpages) ELSE 0 END)::bigint AS row_count FROM pg_class WHERE oid = 'ke'::regclass;
+```
+```
+postgres=# select reltablespace, relfilenode from pg_class where oid = 'ke'::regclass;
+```
+(tbc)
+######extensions in this database
+```
+select * from pg_extension;
+\dx
+```
+######
+(tbc)
+#####Chapter 3. Configuration
+######Changing parameters in your programs
 ```
 SET work_mem = '16MB';   //MB is case sensitive.
 ```
@@ -151,14 +170,42 @@ show work_mem:
 ```
 SELECT * FROM pg_settings WHERE name='work_mem';
 ```
+show more props
+```
+SELECT name, setting, reset_val, source FROM pg_settings WHERE source = 'session';
+```
+######Find the current configuration
+```
+SHOW config_file;
+```
+###### nondefault settings?
+
 Check which parameters have been changed already or whether our changes have correctly taken effect.
 ```
-SELECT name, source, settingFROM pg_settings WHERE source != 'default' AND source != 'override' ORDER by 2, 1;
+SELECT name, source, setting FROM pg_settings WHERE source != 'default' AND source != 'override' ORDER by 2, 1;
 ```
 other columns:
 ```
 boot_val,reset_val
 ```
+
+######Updating the parameter file
+```
+ALTER SYSTEM SET shared_buffers = '1GB';
+```
+This command will not edit postgresql.conf.  
+It writes the new setting to another file postgresql.auto.conf.  
+
+
+######server configuration checklist
+```
+vim  /etc/sysctl.conf
+```
+edit
+```
+kernel.shmmax=value
+```
+
 
 
 reload config file: re-read the postgresql.conf
