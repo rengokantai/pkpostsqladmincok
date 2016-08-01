@@ -1,17 +1,35 @@
-#### pkpostsqladmincok
-- cp1
+#### pkpsqladmincok2ed
+#####Chapter 1. First Steps
+######Connecting to
+```
+psql postgresql://root:root@localhost:5432/postgres
+```
+inner vars
 ```
 SELECT inet_server_port();
 SELECT current_database();
 SELECT current_user;
 ```
 
-enable remote connection:  
+######enable remote connection:  
 
 postgresql.conf:
 ```
 listen_addresses = '*'
 ``` 
+and change pg_hba.conf
+######Using the psql query
+```
+psql –h hostname –p 5432 –d ke –U root
+```
+-c and -f
+```
+psql -c "SELECT current_database"
+```
+interactive
+```
+psql –f file.sql
+```
 
 ==
 .pgpass file.
