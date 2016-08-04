@@ -283,10 +283,16 @@ some important settings: possible context value: sighup , superuser
 SELECT name, setting, unit,(source = 'default') as is_default FROM pg_settings WHERE context = 'sighup' AND (name like '%delay' or name like '%timeout') AND setting != '0';
 ```
 
-kill
+kill(-SIGHUP = restart)
 ```
-kill -SIGHUP \`psql -t -c "select pid from pg_stat_activity limit 1"`
+kill -SIGHUP `psql -t -c "select pid from pg_stat_activity limit 1"`
 ```
+######Restarting the server quickly
+redhat
+```
+pg_ctl -D datadir (-m fast) start
+```
+######Preventing new connections
 
 limit database connection:
 ```
@@ -294,14 +300,26 @@ ALTER DATABASE db CONNECTION LIMIT 0;
 ALTER USER user CONNECTION LIMIT 0;
 ```
 
-(test), create a pg_hba.conf, add these: (only superusers are allowed to connect)
+(test), create a pg_hba.conf),,backup original pg_hba.conf, add these: (only superusers are allowed to connect)
 ```
 local  all	       postgres			ident
   local  all		all	      			reject
   host   all		all	      0.0.0.0/0	reject
 ```
 
+
+still want superuser access.
+```
+  local  all       postgres                   peer
+  local  all       all                      reject
+  host   all       all          0.0.0.0/0   reject
+```
+
+######Restricting users to only one session
 list connections per user
+```
+ALTER ROLE ke CONNECTION LIMIT 1;
+```
 ```
 SELECT rolconnlimit FROM pg_roles WHERE rolname = 'ke';
 ```
