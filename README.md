@@ -195,6 +195,10 @@ ALTER SYSTEM SET shared_buffers = '1GB';
 ```
 This command will not edit postgresql.conf.  
 It writes the new setting to another file postgresql.auto.conf.  
+use pg_ctlcluster, a usage:
+```
+pg_ctlcluster 9.5 main restart
+```
 
 
 ######server configuration checklist
@@ -205,6 +209,10 @@ edit
 ```
 kernel.shmmax=value
 ```
+
+
+
+
 
 
 
@@ -240,23 +248,36 @@ In each round, no more than this many buffers will be written by the background 
 bgwriter_lru_maxpages = 0
 ```
 
-- cp4
+#####Chapter 4. Server Control
+######Starting the database server manually
 start pg server. from [here](http://www.postgresql.org/docs/current/static/server-start.html)  
-```
-postgres -D /usr/local/pgsql/data
-```
 
-stop:
+in ubuntu 16.04
 ```
-pg_ctl -D /usr/local/pgsql/data -m fast stop   // -m fast means immediately
-pg_ctl -D /usr/local/pgsql/data -m immediate stop   //even fast
+pg_ctlcluster 9.5 main start
 ```
-Reloading the server configuration files,(see prev chap)
+redhat:
+```
+pg_ctl -D /var/lib/pgsql/data start
+```
+######Stopping the server safely and quickly
+```
+pg_ctl -D datadir (-m fast) stop    (-m fast) means fast stop
+pg_ctlcluster 9.0 main stop --force
+```
+######Stopping the server in an emergency
+redhat:
+```
+pg_ctl -D datadir stop -m immediate
+```
+######Reloading the server configuration files
+```
+pg_ctlcluster 9.5 main reload
+```
+in psql:
 ```
 select pg_reload_conf(); //show result
 ```
-
-
 some important settings: possible context value: sighup , superuser
 ```
 SELECT name, setting, unit,(source = 'default') as is_default FROM pg_settings WHERE context = 'sighup' AND (name like '%delay' or name like '%timeout') AND setting != '0';
