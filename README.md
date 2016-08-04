@@ -372,8 +372,41 @@ or set default previleges
 ```
 ALTER DEFAULT PRIVILEGES FOR USER ke IN SCHEMA ke GRANT SELECT ON TABLES TO PUBLIC;
 ```
+######Giving users their own private database
+set a private database and revoke:
+```
+create database a owner=root;
+revoke connect on database a from root;
+```
+revoke from public and grant to user:
+```
+begin;
+revoke connect on database a from public;
+grant connect on database a to root;
+commit;
+```
+######Running multiple servers on one system
+root user:
+```
+sudo -u postgres pg_createcluster 9.5 main2
+sudo -u postgres pg_ctlcluster 9.4 main2 start
+```
+in postgres user:
+```
+psql --cluster 9.5/main2
+```
 
-- cp5
+Redhat(not verified)
+```
+sudo -u postgres initdb -D /var/lib/pgsql/main2
+sudo -u postgres pg_ctl -D /var/lib/pgsql/main2 start
+```
+######Setting up a connection pool
+######Accessing multiple servers using the same host 
+
+#####Chapter 5. Tables and Data
+######Choosing good names for database objects
+######Handling objects with quoted names
 ```
 SELECT * FROM AA; = SELECT * FROM aa; = SELECT * FROM aA;
 ```
@@ -383,10 +416,14 @@ to remove this, use
 select quote_ident('AA');
 ```
 
+######Enforcing the same name and definition for columns
+######Identifying and removing duplicates
+
 show al rows with same id
 ```
-SELECT * FROM data WHERE id IN (SELECT id FROM data GROUP BY id HAVING count(*) > 1);
+CREATE UNLOGGED TABLE dup_cust AS SELECT * FROM data WHERE id IN (SELECT id FROM data GROUP BY id HAVING count(*) > 1);
 ```
+An UNLOGGED table can be created with less I/O because it does not write WAL. 
 
 
 delete exactly duplicate row
@@ -401,7 +438,7 @@ Then cleanup
 VACUUM table;
 ```
 
-prevent dulpicate row
+######Preventing dulpicate rows
 ```
 ALTER TABLE table ADD PRIMARY KEY(id);
 ALTER TABLE table ADD UNIQUE(id);
@@ -412,6 +449,16 @@ CREATE UNIQUE INDEX ON table(id);
 create partial index:
 ```
 CREATE UNIQUE INDEX ON table(customerid) WHERE column = 'prop';
+```
+
+gist type
+```
+CREATE TABLE boxes (name text, position box);
+INSERT INTO boxes VALUES ('First', box '((0,0), (1,1))');
+```
+then enforce uniqueness
+```
+ALTER TABLE boxes ADD EXCLUDE USING gist (position WITH &&);
 ```
 
 
