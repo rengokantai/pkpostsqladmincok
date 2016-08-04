@@ -468,3 +468,13 @@ analyze table;
 SELECT attname, n_distinct FROM pg_stats WHERE schemaname = 'public' AND tablename = 'name';
 ```
 -1 means no duplicate.
+
+######Generating test data
+generate series of number
+```
+SELECT * FROM generate_series(1,5);
+```
+generate one week
+```
+SELECT date(generate_series(now(), now() + '1week', '1 days'));    --  1week=1 week, day=days
+```
