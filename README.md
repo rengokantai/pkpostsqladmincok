@@ -215,7 +215,7 @@ kernel.shmmax=value
 
 
 
-
+######This section is from 1st edition.
 reload config file: re-read the postgresql.conf
 ```
 pg_ctl -D /usr/local/pgsql/data reload         //data dic
@@ -247,7 +247,7 @@ In each round, no more than this many buffers will be written by the background 
 ```
 bgwriter_lru_maxpages = 0
 ```
-
+=====
 #####Chapter 4. Server Control
 ######Starting the database server manually
 start pg server. from [here](http://www.postgresql.org/docs/current/static/server-start.html)  
@@ -329,13 +329,50 @@ SELECT count(*) FROM pg_stat_activity WHERE usename = 'ke';
 ```
 
 
-kick user out.  
+######Pushing users off the system
 //list all non-superusers
 ```
 SELECT count(pg_terminate_backend(pid)) FROM pg_stat_activity WHERE usename NOT IN (SELECT usename FROM pg_user WHERE usesuper);
 ```
   
-  
+Note:  
+(before psql 9.4)
+pid was called procpid  
+query was called current_query  
+
+######Using multiple schemas
+Separate groups of tables into their own namespaces, referred to as schemas by PostgreSQL.  
+```
+CREATE SCHEMA ke;
+CREATE TABLE ke.tbname (id integer);
+```
+```
+select current_schema;  --should return public
+```
+
+If we want to let only a specific user look at certain sets of tables, we can modify their search_path parameter.
+```
+ALTER ROLE ke SET search_path = 'ke';
+```
+revoke/grant
+```
+REVOKE ALL ON SCHEMA ke FROM public;
+GRANT ALL ON SCHEMA ke TO ke;
+```
+or grant some privileges
+```
+GRANT USAGE ON SCHEMA ke TO ke;
+GRANT CREATE ON SCHEMA ke TO ke;
+```
+Note you will also need to issue specific grants for objects.
+```
+GRANT SELECT ON tbname TO public;
+```
+or set default previleges
+```
+ALTER DEFAULT PRIVILEGES FOR USER ke IN SCHEMA ke GRANT SELECT ON TABLES TO PUBLIC;
+```
+
 - cp5
 ```
 SELECT * FROM AA; = SELECT * FROM aa; = SELECT * FROM aA;
